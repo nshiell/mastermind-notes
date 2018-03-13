@@ -21,68 +21,80 @@ function postData($http, url, data, callback) {
 angular.module('notesApp', [])
   .controller('NotesListController', function ($scope, $http) {
 
+    const titleLength = 20
     var notesList = this;
 
     notesList.noteBlank = {
       body: null
     }
-    
-    notesList.blah = 'sdfgsdf\ngsdfgsdfg'
+
     $http.get("api.php")
       .then(function(response) {
-          //console.log(response.data)
           notesList.notes = response.data
-          /*notesList.notes = [
-            {text:'learn 2345AngularJS'},
-            {text:'build an srgjioAngularJS app'}];*/
-          //$scope.myWelcome = response.data;
+          notesList.notes.push({
+            body: null
+          })
+
+          notesList.notes.forEach(function (e) {
+            Object.defineProperty(e, 'title', {
+              get: function() {
+                if (!this.body) {
+                  return ''
+                }
+
+                if (this.body.length > titleLength) {// &hellip;
+                  return this.body.substring(0, titleLength) + '\u2026'
+                }
+
+                return this.body
+              }
+            })
+          })
       });
 
-    /*var notesList = this;
-    notesList.notes = [
-      {text:'learn AngularJS'},
-      {text:'build an AngularJS app'}];
- */
-    notesList.addTodo = function() {
-      notesList.notes.push({text: notesList.todoText});
-      notesList.todoText = '';
-    };
- 
-    notesList.remaining = function() {
-      var count = 0;
-      angular.forEach(notesList.todos, function(todo) {
-        count += todo.done ? 0 : 1;
-      });
-      return count;
-    };
+    notesList.show = function (note) {
+      $scope.noteActive = note
+    }
+    
+    notesList.remove = function (note) {
+      if (confirm('Remove ' + note.title + '?')) {
+        $http.delete('/api.php/' + note.id).then(
+          function () {
+            notesList.notes.forEach(function (item, index, notes) {
+              if (note.id == item.id) {
+                notes.splice(index, 1)
+              }
+            })
+          }, 
+          function (){
+            alert('can\'t delete')
+          }
+        )
+      }
+    }
     
     notesList.create = function () {
-      postData($http, 'api.php', notesList.noteBlank, function () {
-        notesList.notes.push(notesList.noteBlank)
+      postData($http, 'api.php', notesList.notes[notesList.notes.length - 1], function () {
 
-        notesList.noteBlank = {
+        var blank = {
           body: null
         }
-      })
-      /*
-      $http.post("api.php", notesList.noteBlank)
-        .then(function(response) {
-          notesList.notes.push(notesList.noteBlank)
-          console.log(response.data)
-          //notesList.notes = response.data
-          /*notesList.notes = [
-            {text:'learn 2345AngularJS'},
-            {text:'build an srgjioAngularJS app'}];*---/
-          //$scope.myWelcome = response.data;
-      });*/
-    }
- /*
-    notesList.archive = function() {
-      var oldTodos = todoList.todos;
-      notesList.todos = [];
-      angular.forEach(oldTodos, function(todo) {
-        if (!todo.done) notesList.todos.push(todo);
-      });
-    };*/
-  });
 
+        Object.defineProperty(blank, 'title', {
+          get: function() {
+            if (!this.body) {
+              return ''
+            }
+
+            if (this.body.length > 10) {// &hellip;
+              return this.body.substring(0, 10) + '\u2026'
+            }
+
+            return this.body
+          }
+        })
+
+        notesList.notes.push(blank)
+      })
+    }
+  });

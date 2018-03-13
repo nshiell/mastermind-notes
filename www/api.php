@@ -51,6 +51,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $note->body = $_POST['body'];
     $dm->persist($note);
     $dm->flush();
+} elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $id = str_replace('/api.php/', '', $_SERVER['REQUEST_URI']);
+    $note = $dm->getRepository(\NShiell\MastermindNotes\Entity\Note::class)->findOneBy(['id' => $id]);
+    if (!$note) {
+        header("HTTP/1.0 404 Not Found");
+    } else {
+        $dm->remove($note);
+        $dm->flush();
+    }
+    //var_dump(str_replace('/api.php/', '', $_SERVER['REQUEST_URI']));die('=-=-=');
+} else {
+    echo json_encode(array_values($notes->toArray()));
 }
-
-echo json_encode(array_values($notes->toArray()));

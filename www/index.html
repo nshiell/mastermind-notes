@@ -3,39 +3,29 @@
   <head>
     <script src="/js/angular/angular.min.js"></script>
     <script src="/js/mastermind-notes.js"></script>
-    <!--<link rel="stylesheet" href="todo.css">-->
+    <link rel="stylesheet" href="/css/page.css" />
   </head>
   <body>
-    <h2>Notes</h2>
     <div data-ng-controller="NotesListController as notesList">
-      <span>{{notesList.remaining()}} of {{notesList.notes.length}} remaining</span>
-      <!--[ <a href="" data-ng-click="notesList.archive()">archive</a> ]-->
-      <ul class="unstyled">
-        <li data-ng-repeat="todo in notesList.notes">
-          <a href="#" class="done-{{todo.done}}">{{todo.body}}</a>
-        </li>
-      </ul>
+      <aside>
+        <ul>
+          <li data-ng-repeat="note in notesList.notes">
+            <input type="button" data-ng-click="notesList.remove(note)" value="X" />
+            <a href="" data-ng-click="notesList.show(note)">{{note.title}}</a>
+          </li>
+        </ul>
+      </aside>
 
-      <form data-ng-submit="notesList.create()">
-        <textarea data-ng-model="notesList.noteBlank.body"></textarea>
-        <input type="submit" value="Add" />
-      </form>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <form data-ng-submit="notesList.addTodo()">
-        <input type="text" data-ng-model="notesList.todoText" size="30"
-          placeholder="add new todo here">
-        <input class="btn-primary" type="submit" value="add">
-        <h2 style="white-space: pre-line">{{notesList.blah}}</h2>
-      </form>
-    </div>
+      <main>
+        <form data-ng-submit="notesList.create()">
+          <fieldset>
+            <input type="submit" value="Save and add Another" />
+          </fieldset>
+          <!--<textarea data-ng-model="notesList.notes[notesList.notes.length - 1].body"></textarea>-->
+          <textarea data-ng-model="notesList.notes[notesList.notes.length - 1].body"></textarea>
+          <article class="note-active">{{ noteActive.body }}</article>
+        </form>
+      </main>
   </body>
 </html>
 
