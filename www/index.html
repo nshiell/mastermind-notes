@@ -1,0 +1,41 @@
+<!doctype html>
+<html data-ng-app="notesApp">
+  <head>
+    <script src="/js/angular/angular.min.js"></script>
+    <script src="/js/mastermind-notes.js"></script>
+    <!--<link rel="stylesheet" href="todo.css">-->
+  </head>
+  <body>
+    <h2>Notes</h2>
+    <div data-ng-controller="NotesListController as notesList">
+      <span>{{notesList.remaining()}} of {{notesList.notes.length}} remaining</span>
+      <!--[ <a href="" data-ng-click="notesList.archive()">archive</a> ]-->
+      <ul class="unstyled">
+        <li data-ng-repeat="todo in notesList.notes">
+          <a href="#" class="done-{{todo.done}}">{{todo.body}}</a>
+        </li>
+      </ul>
+
+      <form data-ng-submit="notesList.create()">
+        <textarea data-ng-model="notesList.noteBlank.body"></textarea>
+        <input type="submit" value="Add" />
+      </form>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <form data-ng-submit="notesList.addTodo()">
+        <input type="text" data-ng-model="notesList.todoText" size="30"
+          placeholder="add new todo here">
+        <input class="btn-primary" type="submit" value="add">
+        <h2 style="white-space: pre-line">{{notesList.blah}}</h2>
+      </form>
+    </div>
+  </body>
+</html>
+
