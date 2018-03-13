@@ -1,0 +1,29 @@
+{
+    "name": "nicholas/mastermind-notes",
+    "description": "A place for notes",
+    "type": "project",
+    "license": "GPL v3",
+    "authors": [
+        {
+            "name": "Nicholas Shiell",
+            "email": "nicholas@nshiell.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.2",
+        "alcaeus/mongo-php-adapter": "^1.1",
+        "doctrine/mongodb": "^1.6",
+        "doctrine/mongodb-odm": "^1.2",
+        "doctrine/mongodb-odm-bundle": "^3.4",
+        "vlucas/phpdotenv": "^2.5@dev"
+    },
+    "config": {
+        "platform": {
+            "ext-mongo": "1.6.16"
+        }
+    },
+    "autoload": {
+        "psr-4": {"NShiell\\MastermindNotes\\Entity\\": "Entity/"}
+    }
+}
