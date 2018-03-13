@@ -1,0 +1,118 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+@import url("/fonts/Jaldi/Jaldi-Regular.ttf");
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+body {
+  background: linear-gradient(to bottom, #EEEEEE 0%, #DDDDE4 100%); }
+
+a {
+  font-family: 'Jaldi', sans-serif; }
+
+input[type="submit"], input[type="button"] {
+  font-weight: bold;
+  box-shadow: 0px 7px 15px 2px rgba(0, 0, 0, 0.38);
+  background: linear-gradient(to bottom, #33AAFF 0%, #0000FF 100%);
+  border: 1px solid #000000;
+  margin: 0 0 0 20px;
+  color: #FFFFAA;
+  font-size: 20px;
+  padding: 10px 30px;
+  border-radius: 10px;
+  cursor: pointer; }
+  input[type="submit"]:hover, input[type="button"]:hover {
+    background: linear-gradient(to bottom, #99FFFF 0%, #33AAFF 100%);
+    color: #000000; }
+  input[type="submit"]:active, input[type="button"]:active {
+    background: linear-gradient(to bottom, #0000FF 0%, #33AAFF 100%);
+    color: #FFFFFF; }
+
+aside {
+  width: 15vw;
+  height: 100vh;
+  float: left;
+  display: block;
+  background: linear-gradient(to right, #222230 0%, #151515 100%);
+  overflow-y: auto;
+  overflow-x: hidden; }
+  aside a {
+    color: #FFFFFF;
+    text-decoration: none;
+    display: inline-block;
+    width: 80%;
+    padding: 5px; }
+  aside li:hover {
+    background-color: #559999;
+    color: #000000; }
+    aside li:hover input[type="button"] {
+      visibility: visible; }
+  aside input[type="button"] {
+    width: 20px;
+    margin: 0 0 0 5px;
+    visibility: hidden;
+    font-size: 10px;
+    padding: 2px;
+    display: inline;
+    border-radius: 5px; }
+
+textarea, .note-active {
+  width: 70vw;
+  height: 30vh;
+  resize: none;
+  background: linear-gradient(to bottom, #fcfbf2 0%, #fcf7de 100%);
+  border: 1px solid #FFFF00;
+  margin: 0 0 0 20px;
+  border-radius: 10px;
+  box-shadow: 0px 7px 67px 1px rgba(0, 0, 0, 0.38);
+  font-size: 40px;
+  padding: 30px;
+  overflow: auto;
+  white-space: pre-line; }
+
+fieldset {
+  height: 10vh; }
+
+/*# sourceMappingURL=page.css.map */
