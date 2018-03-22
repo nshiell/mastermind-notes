@@ -15,7 +15,7 @@ AnnotationDriver::registerAnnotationClasses();
 $config = new Configuration();
 $config->setProxyDir(__DIR__ . '/../Proxies');
 $config->setProxyNamespace('Proxies');
-$config->setHydratorDir(__DIR__ . '/../Hydrators');
+$config->setHydratorDir(__DIR__ . '/../docker/Hydrators');
 $config->setHydratorNamespace('Hydrators');
 $config->setDefaultDB('mastermindNotes');
 $config->setMetadataDriverImpl(AnnotationDriver::create(__DIR__ . '/../Entity'));
