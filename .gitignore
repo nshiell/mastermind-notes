@@ -2,3 +2,5 @@ vendor/
 www/js/angular/docs
 /sass/.sass-cache
 .sass-cache/
+/docker/log
+/docker/mongodb
