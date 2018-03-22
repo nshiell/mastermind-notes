@@ -2,7 +2,7 @@
 session_start();
 $error = null;
 $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,strpos( $_SERVER["SERVER_PROTOCOL"],'/'))).'://';
-if (empty (!$_SESSION['authorized'])) {
+if (!empty ($_SESSION['authorized'])) {
   header('Location: ' . $protocol . $_SERVER['HTTP_HOST'] . '/');
   exit;
 }
