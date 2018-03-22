@@ -5,3 +5,4 @@ www/js/angular/docs
 /docker/log
 /docker/mongodb
 /.env
+/docker/Hydrators/
