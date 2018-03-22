@@ -33,8 +33,8 @@ echo -e "${PURPLE}Running Mastermind Notes
 
 
 if [ "$3" == "nohup" ]; then
-    echo "${PURPLE}Running container nohup.."
-    echo "use docker stop mastermind-notes${RESET}"
+    echo -e "${PURPLE}Running container nohup.."
+    echo -e "use docker stop mastermind-notes${RESET}"
 
     nohup docker run                  \
         --rm                          \
@@ -45,7 +45,7 @@ if [ "$3" == "nohup" ]; then
         --name mastermind-notes       \
         nshiell/linux-php7.2-mongo:latest &
 else
-    echo "${PURPLE}Running container interactive...${RESET}"
+    echo -e "${PURPLE}Running container interactive...${RESET}"
 
     docker run                        \
         --rm                          \
