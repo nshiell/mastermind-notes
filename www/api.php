@@ -40,6 +40,13 @@ if (!$port) {
     $port = 27017;
 }
 
+session_start();
+if (empty ($_SESSION['authorized'])) {
+    header('HTTP/1.0 403 Forbidden');
+    echo json_encode('Forbidden');
+    exit;
+}
+
 $dm = DocumentManager::create(new Connection('mongodb://' . $host . ':' . $port, $options), $config);
 
 $notes = $dm->createQueryBuilder(\NShiell\MastermindNotes\Entity\Note::class)
