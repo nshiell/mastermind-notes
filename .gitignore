@@ -4,4 +4,4 @@ www/js/angular/docs
 .sass-cache/
 /docker/log
 /docker/mongodb
-.env
+/.env
