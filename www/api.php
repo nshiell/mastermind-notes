@@ -41,7 +41,29 @@ if (!$port) {
 }
 
 session_start();
-if (empty ($_SESSION['authorized'])) {
+
+$authorized = (function () {
+    if (!empty ($_SESSION['authorized'])) {
+        return true;
+    }
+
+    if (empty ($_SERVER['PHP_AUTH_USER'])) {
+        return false;
+    }
+
+    if ($_SERVER['PHP_AUTH_USER'] !== getenv('USERNAME')) {
+        return false;
+    }
+
+    if ($_SERVER['PHP_AUTH_PW'] !== getenv('PASSWORD')) {
+        return false;
+    }
+
+    return true;
+})();
+
+if (!$authorized) {
+    //header('application/json; charset=utf8');
     header('HTTP/1.0 403 Forbidden');
     echo json_encode('Forbidden');
     exit;
