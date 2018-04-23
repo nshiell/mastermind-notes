@@ -47,6 +47,7 @@ RUN \
     apt-get update && \
     apt-get install -y mongodb-org pkg-config libapache2-mod-php7.2 && \
     a2enmod php7.2 && \
+    a2enmod rewrite && \
     apt-get install php7.2-mongodb
 
 RUN mkdir /app && \
