@@ -7,19 +7,32 @@ use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Sabre\VObject;
-use NShiell\MastermindNotes\CalDAV\Backend\MastermindNotes;
+
 use NShiell\MastermindNotes\DAVACL\PrincipalBackend\MastermindNotes as MastermindNotesPrincipalBackend;
 
-//require_once (__DIR__ . '/../vendor/autoload.php');
-
-
+use Sabre\CalDAV\Backend\BackendInterface as CalDAVBackendInterface;
 
 class Go
 {
+    /** @var CalDAVBackendInterface */
+    private $calendarBackend;
+
+    /**
+     * @var Some object that can authenticate
+     * @todo type-hint an interface
+     */
+    private $authenticator;
+
+    public function __construct(CalDAVBackendInterface $calendarBackend, $authenticator)
+    {
+        $this->calendarBackend = $calendarBackend;
+        $this->authenticator = $authenticator;
+    }
+
     public function go()
     {
         // settings
-        date_default_timezone_set('Europe/London');
+        //date_default_timezone_set('Europe/London');
         
         // If you want to run the SabreDAV server in a custom location (using mod_rewrite for instance)
         // You can override the baseUri here.
@@ -28,7 +41,7 @@ class Go
         /* Database */
         //$pdo = new PDO('sqlite:data/db.sqlite');
         //$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
+
         //Mapping PHP errors to exceptions
         /*function exception_error_handler($errno, $errstr, $errfile, $errline) {
             throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
@@ -41,26 +54,34 @@ class Go
         // Backends
         //$authBackend = new Sabre\DAV\Auth\Backend\PDO($pdo);
         $authBackend = new \Sabre\DAV\Auth\Backend\BasicCallBack(function ($username, $password) {
-            return ($username == 'admin' && $password == 'admin');
+            //return ($username == 'admin' && $password == 'admin');
+            return $this->authenticator->authenticate([
+                'username' => $username,
+                'password' => $password
+            ]);
         });
         
         
         //$calendarBackend = new Sabre\CalDAV\Backend\PDO($pdo);
-        $calendarBackend = new MastermindNotes;
+
+        // HERE!
+        //$calendarBackend = new MastermindNotes;
+
         //$principalBackend = new Sabre\DAVACL\PrincipalBackend\PDO($pdo);
-        $principalBackend = new MastermindNotesPrincipalBackend;
+        $principalBackend = new MastermindNotesPrincipalBackend($this->authenticator);
         
         // Directory structure
         $tree = [
             new \Sabre\CalDAV\Principal\Collection($principalBackend),
-            new \Sabre\CalDAV\CalendarRoot($principalBackend, $calendarBackend),
+            new \Sabre\CalDAV\CalendarRoot($principalBackend, $this->calendarBackend),
         ];
         
         $server = new \Sabre\DAV\Server($tree);
         
-        if (isset($baseUri))
+        /*if (isset($baseUri)) {
             $server->setBaseUri($baseUri);
-        
+        }*/
+
         /* Server Plugins */
         $authPlugin = new \Sabre\DAV\Auth\Plugin($authBackend);
         $server->addPlugin($authPlugin);
@@ -88,7 +109,7 @@ class Go
         /* CalDAV Sharing support */
         $server->addPlugin(new \Sabre\DAV\Sharing\Plugin());
         $server->addPlugin(new \Sabre\CalDAV\SharingPlugin());
-        
+
         // Support for html frontend
         $browser = new \Sabre\DAV\Browser\Plugin();
         $server->addPlugin($browser);

@@ -5,52 +5,26 @@ namespace NShiell\MastermindNotes\CalDAV\Backend;
 use Sabre\CalDAV;
 use Sabre\DAV;
 use Sabre\CalDAV\Backend\AbstractBackend;
+use Doctrine\Common\Persistence\ObjectRepository;
 
 /**
- * Simple PDO CalDAV backend.
- *
- * This class is basically the most minimum example to get a caldav backend up
- * and running. This class uses the following schema (MySQL example):
- *
- * CREATE TABLE simple_calendars (
- *    id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
- *    uri VARBINARY(200) NOT NULL,
- *    principaluri VARBINARY(200) NOT NULL
- * );
- *
- * CREATE TABLE simple_calendarobjects (
- *    id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
- *    calendarid INT UNSIGNED NOT NULL,
- *    uri VARBINARY(200) NOT NULL,
- *    calendardata MEDIUMBLOB
- * )
- *
+ * Mastermind Notes CalDAV backend.
  * To make this class work, you absolutely need to have the PropertyStorage
- * plugin enabled.
- *
- * @copyright Copyright (C) 2007-2015 fruux GmbH (https://fruux.com/).
- * @author Evert Pot (http://evertpot.com/)
- * @license http://sabre.io/license/ Modified BSD License
+ * plugin enabled
  */
-class MastermindNotes extends AbstractBackend {
+class MastermindNotes extends AbstractBackend
+{
+    /** @var ObjectRepository */
+    private $noteRepo;
 
-    /**
-     * pdo
-     *
-     * @var \PDO
-     *-/
-    protected $pdo;
+    /** @var string */
+    private $username;
 
-    /**
-     * Creates the backend
-     *
-     * @param \PDO $pdo
-     *-/
-    function __construct(\PDO $pdo) {
-
-        $this->pdo = $pdo;
-
-    }*/
+    public function __construct(ObjectRepository $noteRepo, string $username)
+    {
+        $this->noteRepo = $noteRepo;
+        $this->username = $username;
+    }
 
     /**
      * Returns a list of calendars for a principal.
@@ -78,62 +52,15 @@ class MastermindNotes extends AbstractBackend {
      */
     function getCalendarsForUser($principalUri) {
         return [
-            [
+            [// http://localhost:8080/calendars/$username/mastermind-notes/
                 'id' => 1,
                 'uri' => 'mastermind-notes',
-                'principaluri' => 'principals/admin',
+                'principaluri' => 'principals/' . $this->username,
                 '{DAV:}displayname' => 'Mastermind Notes',
-                '{http://apple.com/ns/ical/}calendar-color' => '#FFDD77'],
-            //['id' => 2, 'uri' => 'test211', 'principaluri' => 'principals/admin', '{DAV:}displayname' => 'test211', '{http://apple.com/ns/ical/}calendar-color' => '#FFFF00'],
-            //['id' => 3, 'uri' => 'test3333', 'principaluri' => 'principals/admin', '{DAV:}displayname' => 'interesting one', '{http://apple.com/ns/ical/}calendar-color' => '#FF00FF']
+                '{http://apple.com/ns/ical/}calendar-color' => '#FFDD77']
         ];
-        // Making fields a comma-delimited list
-        $stmt = $this->pdo->prepare("SELECT id, uri FROM simple_calendars WHERE principaluri = ? ORDER BY id ASC");
-        $stmt->execute([$principalUri]);
-
-        $calendars = [];
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-
-            $calendars[] = [
-                'id'           => $row['id'],
-                'uri'          => $row['uri'],
-                'principaluri' => $principalUri,
-            ];
-
-        }
-
-        return $calendars;
-
     }
 
-    private function createEvent() :string
-    {
-        $vcalendar = new \Sabre\VObject\Component\VCalendar([
-            'VEVENT' => [
-                'UID'     => 3,
-                'SUMMARY' => 'Birthday party!',
-                'DTSTART' => new \DateTime('2018-04-11 02:00:00'),
-                'DTEND'   => new \DateTime('2018-04-11 03:00:00')
-            ]
-        ]);
-
-        return $vcalendar->serialize();
-    }
-
-    private function createEvent2() :string
-    {
-        $vcalendar = new \Sabre\VObject\Component\VCalendar([
-            'VEVENT' => [
-                'UID'     => 4,
-                'SUMMARY' => 'Something else party1qwerqwerqwer23!',
-                'DTSTART' => new \DateTime('2018-04-13 02:00:00'),
-                'DTEND'   => new \DateTime('2018-04-13 03:00:00')
-            ]
-        ]);
-
-        return $vcalendar->serialize();
-    }
-    
     /**
      * Creates a new calendar for a principal.
      *
@@ -146,12 +73,7 @@ class MastermindNotes extends AbstractBackend {
      * @return string
      */
     function createCalendar($principalUri, $calendarUri, array $properties) {
-
-        $stmt = $this->pdo->prepare("INSERT INTO simple_calendars (principaluri, uri) VALUES (?, ?)");
-        $stmt->execute([$principalUri, $calendarUri]);
-
-        return $this->pdo->lastInsertId();
-
+        throw new \Exception(__CLASS__ . '->' . __METHOD__ . 'Not implentted');
     }
 
     /**
@@ -161,13 +83,7 @@ class MastermindNotes extends AbstractBackend {
      * @return void
      */
     function deleteCalendar($calendarId) {
-
-        $stmt = $this->pdo->prepare('DELETE FROM simple_calendarobjects WHERE calendarid = ?');
-        $stmt->execute([$calendarId]);
-
-        $stmt = $this->pdo->prepare('DELETE FROM simple_calendars WHERE id = ?');
-        $stmt->execute([$calendarId]);
-
+        throw new \Exception(__CLASS__ . '->' . __METHOD__ . 'Not implentted');
     }
 
     /**
@@ -205,90 +121,29 @@ class MastermindNotes extends AbstractBackend {
         if ($calendarId != 1) {
             return [];
         }
-/*$d = <<<'EOF'
-BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//www.marudot.com//iCal Event Maker
-X-WR-CALNAME:stuff1
-CALSCALE:GREGORIAN
-BEGIN:VTIMEZONE
-TZID:Europe/London
-TZURL:http://tzurl.org/zoneinfo-outlook/Europe/London
-X-LIC-LOCATION:Europe/London
-BEGIN:DAYLIGHT
-TZOFFSETFROM:+0000
-TZOFFSETTO:+0100
-TZNAME:BST
-DTSTART:19700329T010000
-RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
-END:DAYLIGHT
-BEGIN:STANDARD
-TZOFFSETFROM:+0100
-TZOFFSETTO:+0000
-TZNAME:GMT
-DTSTART:19701025T020000
-RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
-END:STANDARD
-END:VTIMEZONE
-BEGIN:VEVENT
-DTSTAMP:20180408T235255Z
-UID:20180408T235255Z-857855198@marudot.com
-DTSTART;TZID="Europe/London":20180412T120000
-DTEND;TZID="Europe/London":20180412T150000
-SUMMARY:thing20
-URL:blah.com%2F
-DESCRIPTION:desc0
-LOCATION:Moon
-END:VEVENT
-END:VCALENDAR
-EOF;*/
-        $d = $this->createEvent();
-        $d2 = $this->createEvent2();
-        //file_put_contents(__DIR__ . '/../fff' . rand() . '.txt', $d);
-        return [
-            [
-                'id'           => 1,
-                'uri'          => '1523223416.R713.ics',
-                'etag'         => '"' . md5($d) . '"',
-                'calendarid'   => 1,
-                'size'         => strlen($d),
-                'calendardata' => $d
-            ],
-            [
-                'id'           => 2,
-                'uri'          => '1523223418.R713.ics',
-                'etag'         => '"' . md5($d2) . '"',
-                'calendarid'   => 1,
-                'size'         => strlen($d2),
-                'calendardata' => $d2
-            ]
-        ];
-            
-            
-            
-            
-            
-            
-            
-            
-            /*
-        $stmt = $this->pdo->prepare('SELECT id, uri, calendardata FROM simple_calendarobjects WHERE calendarid = ?');
-        $stmt->execute([$calendarId]);
 
-        $result = [];
-        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-            $result[] = [
-                'id'           => $row['id'],
-                'uri'          => $row['uri'],
-                'etag'         => '"' . md5($row['calendardata']) . '"',
-                'calendarid'   => $calendarId,
-                'size'         => strlen($row['calendardata']),
-                'calendardata' => $row['calendardata'],
+        $events = [];
+        foreach ($this->noteRepo->findAll() as $note) {
+            $vcalendar = new \Sabre\VObject\Component\VCalendar([
+                'VEVENT' => [
+                    'UID'     => $note->id,
+                    'SUMMARY' => $note->body,
+                    'DTSTART' => new \DateTime('2018-04-13 02:00:00'),
+                    'DTEND'   => new \DateTime('2018-04-13 03:00:00')
+                ]
+            ]);
+            $event = $vcalendar->serialize();
+            $events[] = [
+                'id'           => $note->id,
+                'uri'          => $note->id . '.R713.ics',
+                'etag'         => '"' . md5($event) . '"',
+                'calendarid'   => 1,
+                'size'         => strlen($event),
+                'calendardata' => $event
             ];
         }
-
-        return $result;*/
-
+        
+        return $events;
     }
 
     /**
@@ -312,88 +167,29 @@ EOF;*/
         if ($calendarId != 1) {
             return null;
         }
-/*$d = <<<'EOF'
-BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//www.marudot.com//iCal Event Maker
-X-WR-CALNAME:stuff1
-CALSCALE:GREGORIAN
-BEGIN:VTIMEZONE
-TZID:Europe/London
-TZURL:http://tzurl.org/zoneinfo-outlook/Europe/London
-X-LIC-LOCATION:Europe/London
-BEGIN:DAYLIGHT
-TZOFFSETFROM:+0000
-TZOFFSETTO:+0100
-TZNAME:BST
-DTSTART:19700329T010000
-RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
-END:DAYLIGHT
-BEGIN:STANDARD
-TZOFFSETFROM:+0100
-TZOFFSETTO:+0000
-TZNAME:GMT
-DTSTART:19701025T020000
-RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
-END:STANDARD
-END:VTIMEZONE
-BEGIN:VEVENT
-DTSTAMP:20180408T235255Z
-UID:20180408T235255Z-857855198@marudot.com
-DTSTART;TZID="Europe/London":20180412T120000
-DTEND;TZID="Europe/London":20180412T150000
-SUMMARY:thing20
-URL:blah.com%2F
-DESCRIPTION:desc0
-LOCATION:Moon
-END:VEVENT
-END:VCALENDAR
-EOF;*/
-        //error_log($this->createEvent2());
-        error_log($this->createEvent2());
-        if ($objectUri == '1523223418.R713.ics') {
-            $d2 = $this->createEvent2();
-            return [
-                'id'           => 1,
-                'uri'          => '1523223418.R713.ics',
-                'etag'         => '"' . md5($d2) . '"',
-                'calendarid'   => 1,
-                'size'         => strlen($d2),
-                'calendardata' => $d2
-            ];
-        } elseif ($objectUri == '1523223416.R713.ics') {
-            $d = $this->createEvent();
-            return [
-                'id'           => 2,
-                'uri'          => '1523223416.R713.ics',
-                'etag'         => '"' . md5($d) . '"',
-                'calendarid'   => 1,
-                'size'         => strlen($d),
-                'calendardata' => $d
-            ];
-        }
 
-    
-    
-    
-        /*
-    
-    
-        $stmt = $this->pdo->prepare('SELECT id, uri, calendardata FROM simple_calendarobjects WHERE calendarid = ? AND uri = ?');
-        $stmt->execute([$calendarId, $objectUri]);
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $uriPars = explode('.', $objectUri);
+        $note = $this->noteRepo->findOneBy(['id' => $uriPars[0]]);
 
-        if (!$row) return null;
-
+        $vcalendar = new \Sabre\VObject\Component\VCalendar([
+            'VEVENT' => [
+                'UID'     => $note->id,
+                'SUMMARY' => $note->body,
+                //'DTSTART' => new \DateTime(),
+                //'DTEND'   => new \DateTime()
+                'DTSTART' => new \DateTime('2018-04-13 02:00:00'),
+                'DTEND'   => new \DateTime('2018-04-13 03:00:00')
+            ]
+        ]);
+        $event = $vcalendar->serialize();
         return [
-            'id'           => $row['id'],
-            'uri'          => $row['uri'],
-            'etag'         => '"' . md5($row['calendardata']) . '"',
-            'calendarid'   => $calendarId,
-            'size'         => strlen($row['calendardata']),
-            'calendardata' => $row['calendardata'],
-         ];*/
-
+            'id'           => $note->id,
+            'uri'          => $note->id . '.R713.ics',
+            'etag'         => '"' . md5($event) . '"',
+            'calendarid'   => 1,
+            'size'         => strlen($event),
+            'calendardata' => $event
+        ];
     }
 
     /**
@@ -415,16 +211,7 @@ EOF;*/
      * @return string|null
      */
     function createCalendarObject($calendarId, $objectUri, $calendarData) {
-
-        $stmt = $this->pdo->prepare('INSERT INTO simple_calendarobjects (calendarid, uri, calendardata) VALUES (?,?,?)');
-        $stmt->execute([
-            $calendarId,
-            $objectUri,
-            $calendarData
-        ]);
-
-        return '"' . md5($calendarData) . '"';
-
+        throw new \Exception(__CLASS__ . '->' . __METHOD__ . 'Not implentted');
     }
 
     /**
@@ -446,12 +233,7 @@ EOF;*/
      * @return string|null
      */
     function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-
-        //$stmt = $this->pdo->prepare('UPDATE simple_calendarobjects SET calendardata = ? WHERE calendarid = ? AND uri = ?');
-        //$stmt->execute([$calendarData, $calendarId, $objectUri]);
-
-        return '"' . md5($calendarData) . '"';
-
+        throw new \Exception(__CLASS__ . '->' . __METHOD__ . 'Not implentted');
     }
 
     /**
@@ -464,13 +246,7 @@ EOF;*/
      * @return void
      */
     function deleteCalendarObject($calendarId, $objectUri) {
-        error_log('func_get_args()');
-        error_log(func_get_args());
-        error_log('============');
-        return;
-        $stmt = $this->pdo->prepare('DELETE FROM simple_calendarobjects WHERE calendarid = ? AND uri = ?');
-        $stmt->execute([$calendarId, $objectUri]);
-
+        throw new \Exception(__CLASS__ . '->' . __METHOD__ . 'Not implentted');
     }
 
 }

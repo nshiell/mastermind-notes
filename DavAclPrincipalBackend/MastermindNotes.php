@@ -20,7 +20,14 @@ use Sabre\DAVACL\PrincipalBackend\CreatePrincipalSupport;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class MastermindNotes extends AbstractBackend implements CreatePrincipalSupport {
+class MastermindNotes extends AbstractBackend implements CreatePrincipalSupport
+{
+
+    /**
+     * @var Some object that can authenticate
+     * @todo type-hint an interface
+     */
+    private $authenticator;
 
     /**
      * PDO table name for 'principals'
@@ -65,16 +72,10 @@ class MastermindNotes extends AbstractBackend implements CreatePrincipalSupport 
         ],
     ];
 
-    /**
-     * Sets up the backend.
-     *
-     * @param \PDO $pdo
-     *-/
-    function __construct(\PDO $pdo) {
-
-        $this->pdo = $pdo;
-
-    }*/
+    function __construct($authenticator)
+    {
+        $this->authenticator = $authenticator;
+    }
 
     /**
      * Returns a list of principals based on a prefix.
@@ -93,18 +94,19 @@ class MastermindNotes extends AbstractBackend implements CreatePrincipalSupport 
      * @return array
      */
     function getPrincipalsByPrefix($prefixPath) {
+        $username = $this->authenticator->getUsername();
         switch ($path) {
-            case 'principals/admin':
+            case 'principals/' . $username:
                 return [
                     'id'  => 1,
                     'uri' => $path,
                 ];
-            case 'principals/admin/calendar-proxy-read':
+            case 'principals/' . $username . '/calendar-proxy-read':
                 return [
                     'id'  => 2,
                     'uri' => $path,
                 ];
-            case 'principals/admin/calendar-proxy-write':
+            case 'principals/' . $username . '/calendar-proxy-write':
                 return [
                     'id'  => 3,
                     'uri' => $path,
@@ -155,18 +157,20 @@ class MastermindNotes extends AbstractBackend implements CreatePrincipalSupport 
      * @return array
      */
     function getPrincipalByPath($path) {
+        $username = $this->authenticator->getUsername();
+
         switch ($path) {
-            case 'principals/admin':
+            case 'principals/' . $username:
                 return [
                     'id'  => 1,
                     'uri' => $path,
                 ];
-            case 'principals/admin/calendar-proxy-read':
+            case 'principals/' . $username . '/calendar-proxy-read':
                 return [
                     'id'  => 2,
                     'uri' => $path,
                 ];
-            case 'principals/admin/calendar-proxy-write':
+            case 'principals/' . $username . '/calendar-proxy-write':
                 return [
                     'id'  => 3,
                     'uri' => $path,
@@ -281,8 +285,10 @@ class MastermindNotes extends AbstractBackend implements CreatePrincipalSupport 
      * @return array
      */
     function searchPrincipals($prefixPath, array $searchProperties, $test = 'allof') {
+        $username = $this->authenticator->getUsername();
+
         if (count($searchProperties) == 0) return [];    //No criteria
-        return 'principals/admin';
+        return 'principals/' . $username;
         /*
         $query = 'SELECT uri FROM ' . $this->tableName . ' WHERE ';
         $values = [];
@@ -339,12 +345,14 @@ class MastermindNotes extends AbstractBackend implements CreatePrincipalSupport 
      * @return string
      */
     function findByUri($uri, $principalPrefix) {
+        $username = $this->authenticator->getUsername();
+
         $value = null;
         $scheme = null;
         list($scheme, $value) = explode(":", $uri, 2);
         if (empty($value)) return null;
         
-        return ($scheme == 'mailto') ? 'principals/admin' : null;
+        return ($scheme == 'mailto') ? 'principals/' . $username : null;
 
         /*
         $uri = null;
