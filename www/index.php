@@ -1,6 +1,7 @@
-<?php session_start(); if (empty ($_SESSION['authorized'])) {header('Location: ' . strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,strpos( $_SERVER["SERVER_PROTOCOL"],'/'))).'://' . $_SERVER['HTTP_HOST'] . '/login.php'); exit;} ?><!doctype html>
+<?php require_once (__DIR__ . '/../go.php'); go(!empty ($hasRun)) ?>
 <html data-ng-app="notesApp">
   <head>
+    <!--<script src="/js/mastermind-notes.js"></script>-->
     <script src="/js/angular/angular.min.js"></script>
     <script src="/js/mastermind-notes.js"></script>
     <link rel="stylesheet" href="/css/page.css" />
@@ -8,6 +9,24 @@
   <body>
     <div data-ng-controller="NotesListController as notesList">
       <aside>
+        <div data-ng-controller="AuthenticationController as auth" data-ng-show="auth.isAuthenticated()">
+          <form data-ng-submit="auth.login()">
+            <label>
+              <span style="display: block">Username:</span>
+              <input type="text" data-ng-model="auth.username" />
+            </label>
+
+            <label>
+              <span style="display: block">Password:</span>
+              <input type="password" data-ng-model="auth.password" />
+            </label>
+
+            <p>
+              <input type="submit" value="Login" />
+            </p>
+          </form>
+        </div>
+
         <ul>
           <li data-ng-repeat="note in notesList.notes">
             <input type="button" data-ng-click="notesList.remove(note)" value="X" />
@@ -27,6 +46,6 @@
           <article class="note-active">{{ noteActive.body }}</article>
         </form>
       </main>
+    </div>
   </body>
 </html>
-

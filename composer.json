@@ -16,7 +16,10 @@
         "doctrine/mongodb": "^1.6",
         "doctrine/mongodb-odm": "^1.2",
         "doctrine/mongodb-odm-bundle": "^3.4",
-        "vlucas/phpdotenv": "^2.5@dev"
+        "vlucas/phpdotenv": "^2.5@dev",
+        "sabre/dav": "~3.2.0",
+        "pimple/pimple": "~3.0",
+        "phroute/phroute": "dev-master"
     },
     "config": {
         "platform": {
@@ -24,6 +27,11 @@
         }
     },
     "autoload": {
-        "psr-4": {"NShiell\\MastermindNotes\\Entity\\": "Entity/"}
+        "psr-4": {
+            "NShiell\\MastermindNotes\\Entity\\": "Entity/",
+            "NShiell\\MastermindNotes\\CalDAV\\Backend\\": "CalDAVBackend/",
+            "NShiell\\MastermindNotes\\DAVACL\\PrincipalBackend\\": "DavAclPrincipalBackend/",
+            "NShiell\\MastermindNotes\\Dav\\": "Dav/"
+        }
     }
 }

@@ -1,6 +1,7 @@
 /* jshint asi: true */
 
-function postData($http, url, data, callback) {
+function postData($http, url, data, callback, callbackError) {
+  callbackError = (callbackError) ? callbackError : function () {}
   $http({
     method: 'POST',
     url: url,
@@ -18,9 +19,33 @@ function postData($http, url, data, callback) {
   }).then(callback)
 }
 
+var user = null
 angular.module('notesApp', [])
-  .controller('NotesListController', function ($scope, $http) {
+  .controller('AuthenticationController', function ($scope, $http) {
 
+    this.isAuthenticated = function () {
+      return !user
+    }
+
+    this.username = null
+    this.password = null
+
+    this.login = function () {
+      postData($http, '/authentication', {
+        'username' : this.username,
+        'password' : this.password
+        },
+        function (response) {
+          // @todo make the return a bool
+          if (response.data == 'true') {
+            user = {}
+          }
+        }
+      )
+    }
+  })
+
+  .controller('NotesListController', function ($scope, $http) {
     const titleLength = 20
     var notesList = this;
 
@@ -34,6 +59,8 @@ angular.module('notesApp', [])
           notesList.notes.push({
             body: null
           })
+
+          user = {}
 
           notesList.notes.forEach(function (e) {
             Object.defineProperty(e, 'title', {
@@ -50,7 +77,11 @@ angular.module('notesApp', [])
               }
             })
           })
-      });
+      }).catch(function (e) {
+        if (e.status == 403) {
+          user = null
+        }
+      })
 
     notesList.show = function (note) {
       $scope.noteActive = note
