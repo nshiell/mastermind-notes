@@ -78,9 +78,7 @@ function go($hasRun): bool {
         return new class {
             public function getUsername(): ?string
             {
-                if (isset ($_SESSION['authorized']) && $_SESSION['authorized']) {
-                    return getenv('USERNAME');
-                }
+                return getenv('USERNAME');
             }
 
             public function authenticate(array $post = null) {
