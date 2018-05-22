@@ -128,8 +128,8 @@ class MastermindNotes extends AbstractBackend
                 'VEVENT' => [
                     'UID'     => $note->id,
                     'SUMMARY' => $note->body,
-                    'DTSTART' => new \DateTime('2018-04-28 02:00:00'),
-                    'DTEND'   => new \DateTime('2018-04-28 03:00:00')
+                    'DTSTART' => $note->dateTimeStart,
+                    'DTEND'   => $note->dateTimeEnd
                 ]
             ]);
             $event = $vcalendar->serialize();
@@ -177,8 +177,8 @@ class MastermindNotes extends AbstractBackend
                 'SUMMARY' => $note->body,
                 //'DTSTART' => new \DateTime(),
                 //'DTEND'   => new \DateTime()
-                'DTSTART' => new \DateTime('2018-04-28 02:00:00'),
-                'DTEND'   => new \DateTime('2018-04-28 03:00:00')
+                'DTSTART' => $note->dateTimeStart,
+                'DTEND'   => $note->dateTimeEnd
             ]
         ]);
         $event = $vcalendar->serialize();

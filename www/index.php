@@ -42,7 +42,10 @@
             <input type="submit" value="Save and add Another" />
           </fieldset>
           <!--<textarea data-ng-model="notesList.notes[notesList.notes.length - 1].body"></textarea>-->
+          <input type="date" data-ng-model="notesList.notes[notesList.notes.length - 1].dateTimeStart.date" />
+          <br />
           <textarea data-ng-model="notesList.notes[notesList.notes.length - 1].body"></textarea>
+          <h3>{{ noteActive.dateTimeStart.date }}</h3>
           <article class="note-active">{{ noteActive.body }}</article>
         </form>
       </main>

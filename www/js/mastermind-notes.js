@@ -50,14 +50,16 @@ angular.module('notesApp', [])
     var notesList = this;
 
     notesList.noteBlank = {
-      body: null
+      body: null,
+      dateTimeStart: {date: null}
     }
 
     $http.get("api.php")
       .then(function(response) {
           notesList.notes = response.data
           notesList.notes.push({
-            body: null
+            body: null,
+            dateTimeStart: {date: null}
           })
 
           user = {}
@@ -105,10 +107,13 @@ angular.module('notesApp', [])
     }
     
     notesList.create = function () {
-      postData($http, 'api.php', notesList.notes[notesList.notes.length - 1], function () {
+      var note = notesList.notes[notesList.notes.length - 1]
+      note.date = note.dateTimeStart.date
+      postData($http, 'api.php', note, function () {
 
         var blank = {
-          body: null
+          body: null,
+          dateTimeStart: {date: null}
         }
 
         Object.defineProperty(blank, 'title', {

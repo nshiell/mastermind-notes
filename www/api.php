@@ -77,7 +77,13 @@ $notes = $dm->createQueryBuilder(\NShiell\MastermindNotes\Entity\Note::class)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $note = new \NShiell\MastermindNotes\Entity\Note;
-    $note->body = $_POST['body'];
+    $note->body = isset ($_POST['body']) ? $_POST['body'] : '';
+    if (isset ($_POST['date'])) {
+        $d = str_replace('00:00:00', '12:00:00', $_POST['date']);
+        $date = new \DateTime($d);
+        $note->dateTimeStart = $date;
+        $note->dateEnd = $date;
+    }
     $dm->persist($note);
     $dm->flush();
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
@@ -89,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dm->remove($note);
         $dm->flush();
     }
-    //var_dump(str_replace('/api.php/', '', $_SERVER['REQUEST_URI']));die('=-=-=');
 } else {
     echo json_encode(array_values($notes->toArray()));
 }

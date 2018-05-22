@@ -12,4 +12,10 @@ class Note
 
     /** @ODM\Field(type="string") */
     public $body;
+
+    /** @ODM\Field(type="date") */
+    public $dateTimeStart;
+
+    /** @ODM\Field(type="date") */
+    public $dateTimeEnd;
 }
