@@ -79,10 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $note = new \NShiell\MastermindNotes\Entity\Note;
     $note->body = isset ($_POST['body']) ? $_POST['body'] : '';
     if (isset ($_POST['date'])) {
-        $d = str_replace('00:00:00', '12:00:00', $_POST['date']);
-        $date = new \DateTime($d);
-        $note->dateTimeStart = $date;
-        $note->dateEnd = $date;
+        $d1 = str_replace('00:00:00', '12:00:00', $_POST['date']);
+        $d2 = str_replace('00:00:00', '13:00:00', $_POST['date']);
+        $note->dateTimeStart = new \DateTime($d1);
+        $note->dateTimeEnd = new \DateTime($d2);
     }
     $dm->persist($note);
     $dm->flush();
