@@ -181,12 +181,44 @@ function save(data, id) {
     xhr.send(param(data))
 }
 
+function createDatePickers() {
+    function pad(number) {
+        number = number - 0
+        return (number < 10) ? '0' + number : number
+    }
+
+    var today = new Date()
+
+    var $startPicker = document.querySelector('.start-picker')
+    var $form = document.querySelector('form.editor')
+
+    function showDateFunction(events, jsEvent, cell) {
+        if (jsEvent == 'click') {
+            // @todo dont scrape HTML
+            $form.elements.namedItem('dateTimeStart').value = 'Y-M-DTH:MIN:00'.
+                replace('Y', today.getFullYear()).
+                replace('M', pad(today.getMonth() + 1)).
+                replace('D', pad(cell.innerHTML)).
+                replace('H', pad($form.elements.namedItem('startHour').value)).
+                replace('MIN', pad($form.elements.namedItem('startMinute').value))
+        }
+    }
+    new Month(today).drawCalendar(
+        $startPicker,
+        1,
+        null,
+        showDateFunction,
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+    )
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     if (document.body.className.indexOf('logged-in') == -1) {
         location.href = '/login.php'
         return
     }
 
+    createDatePickers()
     var xhr = new XMLHttpRequest()
     xhr.open('GET', '/api.php/notes')
     xhr.onload = function () {

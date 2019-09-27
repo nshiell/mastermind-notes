@@ -46,11 +46,45 @@ body {
         margin: 5px; } }
 
 form.editor label.label {
-  width: 60px;
-  display: inline-block; }
+  width: 60px; }
+
+form.editor label {
+  display: block; }
 
 .pane.editor textarea {
   width: 100%;
   height: 200px; }
+
+form .time {
+  width: 35px;
+  font-weight: bold; }
+
+.date-picker {
+  font-size: 10px;
+  background-color: #AAAAAA;
+  display: inline-block;
+  text-align: center; }
+  .date-picker table {
+    border-collapse: collapse; }
+  .date-picker td {
+    border: 1px solid #888888;
+    padding: 2px 5px;
+    cursor: pointer; }
+    .date-picker td:hover {
+      background-color: #FFFFFF; }
+    .date-picker td.weekend {
+      border: 1px solid #FFFF88;
+      background-color: #DDDDAA; }
+
+.date-container {
+  margin: 20px 0 0 0;
+  background-color: #000044;
+  padding: 10px;
+  display: inline-block; }
+  .date-container label {
+    color: #FFFFFF; }
+  .date-container .date-time-raw {
+    font-size: 10px;
+    width: 110px; }
 
 /*# sourceMappingURL=page.css.map */

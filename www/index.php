@@ -25,13 +25,19 @@
     <textarea name="body"></textarea>
   </label>
 
-  <label>
-    <span class="label">Start:</span>
-    <input type="text" name="dateTimeStart" pattern=
-           "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"
-           placeholder="2019-10-10T22:35:17"
-           value="2019-10-10T22:35:17" />
-  </label>
+  <div class="date-container">
+    <div class="date-picker start-picker"></div>
+    <br />
+    <input name="startHour" class="time" type="number" placeholder="00" pattern="[0-9][0-9]" />
+    <input name="startMinute" class="time" type="number" placeholder="00" pattern="[0-9][0-9]" />
+    <label>
+      <span class="label">Start:</span>
+      <input type="text" class="date-time-raw" name="dateTimeStart" pattern=
+             "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"
+             placeholder="2019-10-10T22:35:17"
+             value="2019-10-10T22:35:17" />
+    </label>
+  </div>
 
   <label>
     <span class="label">End:</span>
