@@ -6,7 +6,7 @@
   <script type="text/javascript" src="/js-plain-calendar/js/nshiell-js-plain-calendar.js"></script>
   <script type="text/javascript" src="/js/mastermind-notes.js"></script>
 
-  <link rel="stylesheet" href="/css/page1.css" />
+  <link rel="stylesheet" href="/css/page.css" />
   <style>
   </style>
 </head>
