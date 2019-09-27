@@ -1,5 +1,4 @@
 <?php
-
 use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -75,17 +74,51 @@ $notes = $dm->createQueryBuilder(\NShiell\MastermindNotes\Entity\Note::class)
     ->getQuery()
     ->execute();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $note = new \NShiell\MastermindNotes\Entity\Note;
-    $note->body = isset ($_POST['body']) ? $_POST['body'] : '';
-    if (isset ($_POST['date'])) {
-        $d1 = str_replace('00:00:00', '12:00:00', $_POST['date']);
-        $d2 = str_replace('00:00:00', '13:00:00', $_POST['date']);
-        $note->dateTimeStart = new \DateTime($d1);
-        $note->dateTimeEnd = new \DateTime($d2);
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $uriParts = explode('/', $_SERVER['REQUEST_URI']);
+    $id = array_pop($uriParts);
+
+    $noteRepo = $dm->getRepository(\NShiell\MastermindNotes\Entity\Note::class);
+    $note = $noteRepo->find($id);
+    $dm->remove($note);
+    $dm->flush();
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $uriParts = explode('/', $_SERVER['REQUEST_URI']);
+    $id = array_pop($uriParts);
+    $idBefore = array_pop($uriParts);
+
+    $noteRepo = $dm->getRepository(\NShiell\MastermindNotes\Entity\Note::class);
+    if ($id == 'notes' || ($id == '' && $idBefore == 'notes')) {
+        $note = new \NShiell\MastermindNotes\Entity\Note;
+    } else {
+        $note = $noteRepo->find($id);
     }
+
+    if (!$note) {
+        die (json_encode(['error' => 'bad id']));
+    }
+
+    $note->body = isset ($_POST['body']) ? $_POST['body'] : '';
+    // "2008-07-01T22:35:17.02"
+
+    /** @todo make better validation */
+    if ($_POST['dateTimeStart']) {
+        if (!\DateTime::createFromFormat('Y-m-d\TH:i:s', $_POST['dateTimeStart'])) {
+            die (json_encode(['error' => 'dateTimeStart']));
+        }
+        $note->dateTimeStart = new \DateTime($_POST['dateTimeStart']);
+    }
+
+    if ($_POST['dateTimeEnd']) {
+        if (!\DateTime::createFromFormat('Y-m-d\TH:i:s', $_POST['dateTimeEnd'])) {
+            die (json_encode(['error' => 'dateTimeEnd']));
+        }
+        $note->dateTimeEnd = new \DateTime($_POST['dateTimeEnd']);
+    }
+
     $dm->persist($note);
     $dm->flush();
+    echo json_encode($note);
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $id = str_replace('/api.php/', '', $_SERVER['REQUEST_URI']);
     $note = $dm->getRepository(\NShiell\MastermindNotes\Entity\Note::class)->findOneBy(['id' => $id]);
