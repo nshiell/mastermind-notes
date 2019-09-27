@@ -1,54 +1,53 @@
-<?php require_once (__DIR__ . '/../go.php'); go(!empty ($hasRun)) ?>
-<html data-ng-app="notesApp">
-  <head>
-    <!--<script src="/js/mastermind-notes.js"></script>-->
-    <script src="/js/angular/angular.min.js"></script>
-    <script src="/js/mastermind-notes.js"></script>
-    <link rel="stylesheet" href="/css/page.css" />
-  </head>
-  <body>
-    <div data-ng-controller="NotesListController as notesList">
-      <aside>
-        <div data-ng-controller="AuthenticationController as auth" data-ng-show="auth.isAuthenticated()">
-          <form data-ng-submit="auth.login()">
-            <label>
-              <span style="display: block">Username:</span>
-              <input type="text" data-ng-model="auth.username" />
-            </label>
+<?php require_once (__DIR__ . '/../go.php'); go(!empty ($hasRun)) ?><!doctype html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8" />
+  <title>Mastermind Notes</title>
+  <script type="text/javascript" src="/js-plain-calendar/js/nshiell-js-plain-calendar.js"></script>
+  <script type="text/javascript" src="/js/mastermind-notes.js"></script>
 
-            <label>
-              <span style="display: block">Password:</span>
-              <input type="password" data-ng-model="auth.password" />
-            </label>
+  <link rel="stylesheet" href="/css/page.css" />
+  <style>
+  </style>
+</head>
+<body class="<?php if ($_SESSION['authorized']) echo 'logged-in' ?>">
+<p><a href="/logout.php">Logout</a></p>
+<div class="today pane">
+  <h1>Today's Things:</h1>
+  <table></table>
+</div>
 
-            <p>
-              <input type="submit" value="Login" />
-            </p>
-          </form>
-        </div>
+<div class="calendar pane"></div>
 
-        <ul>
-          <li data-ng-repeat="note in notesList.notes">
-            <input type="button" data-ng-click="notesList.remove(note)" value="X" />
-            <a href="" data-ng-click="notesList.show(note)">{{note.title}}</a>
-          </li>
-        </ul>
-        <a href="/logout.php">Logout</a>
-      </aside>
+<form class="pane editor" onsubmit="saveCurrent(); return false">
+  <label>
+    <span class="label">Body:</span>
+    <textarea name="body"></textarea>
+  </label>
 
-      <main>
-        <form data-ng-submit="notesList.create()">
-          <fieldset>
-            <input type="submit" value="Save and add Another" />
-          </fieldset>
-          <!--<textarea data-ng-model="notesList.notes[notesList.notes.length - 1].body"></textarea>-->
-          <input type="date" data-ng-model="notesList.notes[notesList.notes.length - 1].dateTimeStart.date" />
-          <br />
-          <textarea data-ng-model="notesList.notes[notesList.notes.length - 1].body"></textarea>
-          <h3>{{ noteActive.dateTimeStart.date }}</h3>
-          <article class="note-active">{{ noteActive.body }}</article>
-        </form>
-      </main>
-    </div>
-  </body>
+  <label>
+    <span class="label">Start:</span>
+    <input type="text" name="dateTimeStart" pattern=
+           "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"
+           placeholder="2019-10-10T22:35:17"
+           value="2019-10-10T22:35:17" />
+  </label>
+
+  <label>
+    <span class="label">End:</span>
+    <input type="text" name="dateTimeEnd" pattern=
+           "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"
+           placeholder="2019-10-10T22:35:17"
+           value="2019-10-10T22:35:17" />
+  </label>
+
+  <div>
+    <input type="submit" value="Save" />
+  </div>
+</form>
+
+<div class="note pane">
+</div>
+
+</body>
 </html>
