@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <title>Mastermind Notes</title>
-  <script type="text/javascript" src="/js-plain-calendar/js/nshiell-js-plain-calendar.js"></script>
-  <script type="text/javascript" src="/js/mastermind-notes.js"></script>
+  <script type="text/javascript" src="/js-plain-calendar/js/nshiell-js-plain-calendar.js?cb=0"></script>
+  <script type="text/javascript" src="/js/mastermind-notes.js?cb=0"></script>
 
   <link rel="stylesheet" href="/css/page.css" />
   <style>
