@@ -42,15 +42,33 @@ function drawCalendarForToday(eventsData) {
         this.id = id
     }
 
+    // Get the minutes UTC is behind our timezone
+    // We need to correct the display as times from server are UTC!
+    function createDateInThisTimeZone(rawDate) {
+        var now = new Date()
+        var nowUtcBehindNowTimeZone = now.getTimezoneOffset()
+
+        newDate = new Date(rawDate.date)
+        newDate.setMinutes(newDate.getMinutes() - nowUtcBehindNowTimeZone)
+
+        return newDate
+    }
+
     eventsData.forEach(function (eventData) {
             if (eventData.dateTimeStart) {
                 var dateEnd = null
                 if (eventData.dateTimeEnd) {
-                    dateEnd = new Date(eventData.dateTimeEnd.date)
+                    dateEnd = createDateInThisTimeZone(
+                        eventData.dateTimeEnd
+                    )
                 }
 
+                var dateStart = createDateInThisTimeZone(
+                    eventData.dateTimeStart
+                )
+
                 events.push(new EventCal(
-                    new Date(eventData.dateTimeStart.date),
+                    dateStart,
                     dateEnd,
                     eventData.body,
                     eventData.id

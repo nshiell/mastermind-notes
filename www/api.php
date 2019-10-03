@@ -106,14 +106,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         if (!\DateTime::createFromFormat('Y-m-d\TH:i:s', $_POST['dateTimeStart'])) {
             die (json_encode(['error' => 'dateTimeStart']));
         }
-        $note->dateTimeStart = new \DateTime($_POST['dateTimeStart']);
+        $note->dateTimeStart = new \DateTime(
+            $_POST['dateTimeStart'],
+            new \DateTimeZone('Europe/London')
+        );
     }
 
     if ($_POST['dateTimeEnd']) {
         if (!\DateTime::createFromFormat('Y-m-d\TH:i:s', $_POST['dateTimeEnd'])) {
             die (json_encode(['error' => 'dateTimeEnd']));
         }
-        $note->dateTimeEnd = new \DateTime($_POST['dateTimeEnd']);
+        $note->dateTimeEnd = new \DateTime(
+            $_POST['dateTimeEnd'],
+            new \DateTimeZone('Europe/London'));
     }
 
     $dm->persist($note);
