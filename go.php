@@ -30,10 +30,25 @@ function go($hasRun): bool {
             new CalDAVBackendMastermindNotes(
                 $c[DocumentManager::class]
                     ->getRepository(\NShiell\MastermindNotes\Entity\Note::class),
+                $c['Persistance'],
                 getenv('USERNAME')
             ),
             $c['Authentication']
         );
+    };
+
+    $container['Persistance'] = function ($c) {
+        $persistance = new class () {
+            public static $c;
+            public function persist($entity, $doFlush = true) {
+                self::$c[DocumentManager::class]->persist($entity);
+                if ($doFlush) {
+                    self::$c[DocumentManager::class]->flush();
+                }
+            }
+        };
+        $persistance::$c = $c;
+        return $persistance;
     };
 
     $container[DocumentManager::class] = function ($c) {

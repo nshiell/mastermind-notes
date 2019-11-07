@@ -11,6 +11,12 @@ class Note
     public $id;
 
     /** @ODM\Field(type="string") */
+    public $icsId;
+
+    /** @ODM\Field(type="string") */
+    public $icsUri;
+
+    /** @ODM\Field(type="string") */
     public $body;
 
     /** @ODM\Field(type="date") */
