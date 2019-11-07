@@ -121,6 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
             new \DateTimeZone('Europe/London'));
     }
 
+    if ($note->dateTimeEnd < $note->dateTimeStart) {
+        $note->dateTimeEnd = $note->dateTimeStart;
+    }
+
     $dm->persist($note);
     $dm->flush();
     echo json_encode($note);

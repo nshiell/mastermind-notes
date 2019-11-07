@@ -46,6 +46,12 @@ function go($hasRun): bool {
                     self::$c[DocumentManager::class]->flush();
                 }
             }
+            public function remove($entity, $doFlush = true) {
+                self::$c[DocumentManager::class]->remove($entity);
+                if ($doFlush) {
+                    self::$c[DocumentManager::class]->flush();
+                }
+            }
         };
         $persistance::$c = $c;
         return $persistance;

@@ -18,6 +18,8 @@ use Sabre\VObject\Reader;
  */
 class MastermindNotes extends AbstractBackend
 {
+    const SEPERATOR = '--------';
+
     /** @var ObjectRepository */
     private $noteRepo;
 
@@ -139,23 +141,7 @@ class MastermindNotes extends AbstractBackend
 
         $events = [];
         foreach ($this->noteRepo->findAll() as $note) {
-            $vcalendar = new \Sabre\VObject\Component\VCalendar([
-                'VEVENT' => [
-                    'UID'     => $this->getIcsIdForNote($note),
-                    'SUMMARY' => $note->body,
-                    'DTSTART' => $note->dateTimeStart ?? new \DateTime,
-                    'DTEND'   => $note->dateTimeEnd ?? new \DateTime
-                ]
-            ]);
-            $event = $vcalendar->serialize();
-            $events[] = [
-                'id'           => $note->id,
-                'uri'          => $note->icsUri,
-                'etag'         => '"' . md5($note->id . '|' . $note->body) . '"',
-                'calendarid'   => 1,
-                'size'         => strlen($event),
-                'calendardata' => $event
-            ];
+            $events[] = $this->noteToCalendar($note);
         }
         
         return $events;
@@ -178,39 +164,104 @@ class MastermindNotes extends AbstractBackend
      * @return array|null
      */
     function getCalendarObject($calendarId, $objectUri) {
-        
         if ($calendarId != 1) {
             return null;
         }
 
-        $uriPars = explode('.', $objectUri);
-        $note = $this->noteRepo->findOneBy(['id' => $uriPars[0]]);
+        $note = $this->findOneByUri($objectUri);
 
-        if (!$note) {
-            $note = $this->noteRepo->findOneBy(['icsUri' => $objectUri]);
+        if ($note) {
+            return $this->noteToCalendar($note);
         }
+    }
 
-        if (!$note) {
-            return null;
+    private function findOneByUri(string $objectUri): ?Note
+    {
+        $uriPars = explode('.', $objectUri);
+        return $this->noteRepo->findOneBy(['id' => $uriPars[0]])
+            ?? $this->noteRepo->findOneBy(['icsUri' => $objectUri]);
+    }
+
+    private function noteToCalendar(Note $note): ?array {
+        $veventData = [
+            'UID'     => $this->getIcsIdForNote($note),
+            'DTSTART' => $note->dateTimeStart ?? new \DateTime,
+            'DTEND'   => $note->dateTimeEnd ?? new \DateTime
+        ];
+
+        if ($note->body) {
+            if (strpos($note->body, self::SEPERATOR) !== false) {
+                $bodyParts = explode(self::SEPERATOR, $note->body);
+                if (count($bodyParts) > 1) {
+                    $veventData['SUMMARY'] = trim($bodyParts[0]);
+                    $veventData['DESCRIPTION'] = trim($bodyParts[1]);
+                }
+            }
+
+            if (!isset ($veventData['SUMMARY'])) {
+                $bodyLines = explode(PHP_EOL, trim($note->body));
+                $veventData['SUMMARY'] = substr($bodyLines[0], 0, 50);
+                $veventData['DESCRIPTION'] = $note->body;
+            }
         }
 
         $vcalendar = new \Sabre\VObject\Component\VCalendar([
-            'VEVENT' => [
-                'UID'     => $this->getIcsIdForNote($note),
-                'SUMMARY' => $note->body,
-                'DTSTART' => $note->dateTimeStart ?? new \DateTime,
-                'DTEND'   => $note->dateTimeEnd ?? new \DateTime
-            ]
+            'VEVENT' => $veventData
         ]);
+
         $event = $vcalendar->serialize();
         return [
             'id'           => $note->id,
-            'uri'          => $note->icsUri,
-            'etag'         => '"' . md5($note->id . '|' . $note->body) . '"',
+            'uri'          => $note->icsUri ?? $note->id . '.ics',
+            'etag'         => '"' . md5($note->id . '|' . $event) . '"',
             'calendarid'   => 1,
             'size'         => strlen($event),
             'calendardata' => $event
         ];
+    }
+
+    private function populateNoteFromCalendarData(Note $note,
+                                                  string $calendarData,
+                                                  string $objectUri = null)
+    {
+        $vcalendar = Reader::read($calendarData, Reader::OPTION_FORGIVING);
+
+        if (!$vcalendar->VEVENT) {
+            throw new \DomainException('No VEVENT');
+        }
+
+        $note->icsId = $vcalendar->VEVENT->UID->getParts()[0];
+        $note->icsUri = $objectUri;
+        $bodyParts = [];
+        if ($vcalendar->VEVENT->SUMMARY) {
+            if ($vcalendar->VEVENT->SUMMARY->getParts()) {
+                if (is_array($vcalendar->VEVENT->SUMMARY->getParts())) {
+                    if (isset ($vcalendar->VEVENT->SUMMARY->getParts()[0])) {
+                        $bodyParts[] = $vcalendar->VEVENT->SUMMARY->getParts()[0];
+                    }
+                }
+            }
+        }
+
+        if ($vcalendar->VEVENT->DESCRIPTION) {
+            if ($vcalendar->VEVENT->DESCRIPTION->getParts()) {
+                if (is_array($vcalendar->VEVENT->DESCRIPTION->getParts())) {
+                    if (isset ($vcalendar->VEVENT->DESCRIPTION->getParts()[0])) {
+                        $bodyParts[] = $vcalendar->VEVENT->DESCRIPTION->getParts()[0];
+                    }
+                }
+            }
+        }
+
+        $note->body = implode(PHP_EOL . self::SEPERATOR . PHP_EOL, $bodyParts);
+
+        if ($vcalendar->VEVENT->DTSTART) {
+            $note->dateTimeStart = $vcalendar->VEVENT->DTSTART->getDateTime();
+        }
+
+        if ($vcalendar->VEVENT->DTEND) {
+            $note->dateTimeEnd = $vcalendar->VEVENT->DTEND->getDateTime();
+        }
     }
 
     /**
@@ -232,47 +283,25 @@ class MastermindNotes extends AbstractBackend
      * @return string|null
      */
     function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        $vcalendar = Reader::read($calendarData, Reader::OPTION_FORGIVING);
-
-        if ($vcalendar->VEVENT) {
-            $note = new Note;
-
-            $note->icsId = $vcalendar->VEVENT->UID->getParts()[0];
-            $note->icsUri = $objectUri;
-            $bodyParts = [];
-            if ($vcalendar->VEVENT->SUMMARY) {
-                if ($vcalendar->VEVENT->SUMMARY->getParts()) {
-                    if (is_array($vcalendar->VEVENT->SUMMARY->getParts())) {
-                        if (isset ($vcalendar->VEVENT->SUMMARY->getParts()[0])) {
-                            $bodyParts[] = $vcalendar->VEVENT->SUMMARY->getParts()[0];
-                        }
-                    }
-                }
-            }
-
-            if ($vcalendar->VEVENT->DESCRIPTION) {
-                if ($vcalendar->VEVENT->DESCRIPTION->getParts()) {
-                    if (is_array($vcalendar->VEVENT->DESCRIPTION->getParts())) {
-                        if (isset ($vcalendar->VEVENT->DESCRIPTION->getParts()[0])) {
-                            $bodyParts[] = $vcalendar->VEVENT->DESCRIPTION->getParts()[0];
-                        }
-                    }
-                }
-            }
-
-            $note->body = implode(PHP_EOL . '--------' . PHP_EOL, $bodyParts);
-
-            if ($vcalendar->VEVENT->DTSTART) {
-                $note->dateTimeStart = $vcalendar->VEVENT->DTSTART->getDateTime();
-            }
-
-            if ($vcalendar->VEVENT->DTEND) {
-                $note->dateTimeEnd = $vcalendar->VEVENT->DTEND->getDateTime();
-            }
-
-            $this->persistance->persist($note);
-            return '"' . md5($note->id . '|' . $note->body) . '"';
+        if ($calendarId != 1) {
+            return null;
         }
+
+        $note = new Note;
+
+        try {
+            $this->populateNoteFromCalendarData(
+                $note,
+                $calendarData,
+                $objectUri
+            );
+        } catch (\DomainException $e) {
+            error_log($e->getMessage());
+            return null;
+        }
+
+        $this->persistance->persist($note);
+        return '"' . md5($note->id . '|' . $note->body) . '"';
     }
 
     /**
@@ -294,7 +323,25 @@ class MastermindNotes extends AbstractBackend
      * @return string|null
      */
     function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-        throw new \Exception(__CLASS__ . '->' . __METHOD__ . 'Not implentted');
+        if ($calendarId != 1) {
+            return null;
+        }
+
+        $note = $this->findOneByUri($objectUri);
+
+        try {
+            $this->populateNoteFromCalendarData(
+                $note,
+                $calendarData,
+                $objectUri
+            );
+        } catch (\DomainException $e) {
+            error_log($e->getMessage());
+            return null;
+        }
+
+        $this->persistance->persist($note);
+        return '"' . md5($note->id . '|' . $note->body) . '"';
     }
 
     /**
@@ -307,7 +354,14 @@ class MastermindNotes extends AbstractBackend
      * @return void
      */
     function deleteCalendarObject($calendarId, $objectUri) {
-        throw new \Exception(__CLASS__ . '->' . __METHOD__ . 'Not implentted');
+        if ($calendarId != 1) {
+            return null;
+        }
+
+        $note = $this->findOneByUri($objectUri);
+        if ($note) {
+            $this->persistance->remove($note);
+        }
     }
 
 }
