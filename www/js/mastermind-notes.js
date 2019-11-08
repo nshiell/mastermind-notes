@@ -242,7 +242,7 @@ function drawNotes(eventsAndNotes) {
     var $pane = document.querySelector('.pane.notes')
     eventsAndNotes.forEach(function (eventOrNote) {
         if (eventOrNote.dateTimeStart === null) {
-            $pane.innerHTML = escapeHtml(eventOrNote.body) + '<hr />'
+            $pane.innerHTML+= escapeHtml(eventOrNote.body) + '<hr />'
         }
     })
 }
