@@ -100,7 +100,7 @@ function drawCalendarForToday(eventsData) {
                 .replace(/'/g, "&#039;")
             }
 
-            var $pane = document.querySelector('.pane.note')
+            var $pane = document.querySelector('.pane.day')
             $pane.innerHTML = ''
 
             if (eventsForDate.length) {
@@ -230,6 +230,23 @@ function createDatePickers() {
     )
 }
 
+function drawNotes(eventsAndNotes) {
+    function escapeHtml(unsafe) {
+        return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+    }
+    var $pane = document.querySelector('.pane.notes')
+    eventsAndNotes.forEach(function (eventOrNote) {
+        if (eventOrNote.dateTimeStart === null) {
+            $pane.innerHTML = escapeHtml(eventOrNote.body) + '<hr />'
+        }
+    })
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     if (document.body.className.indexOf('logged-in') == -1) {
         location.href = '/login.php'
@@ -241,7 +258,9 @@ document.addEventListener("DOMContentLoaded", function () {
     xhr.open('GET', '/api.php/notes')
     xhr.onload = function () {
         if (xhr.status === 200) {
-            drawCalendarForToday(JSON.parse(xhr.responseText))
+            var eventsAndNotes = JSON.parse(xhr.responseText)
+            drawCalendarForToday(eventsAndNotes)
+            drawNotes(eventsAndNotes)
         } else {
             alert('Request failed.  Returned status of ' + xhr.status)
         }

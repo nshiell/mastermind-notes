@@ -52,7 +52,10 @@
   </div>
 </form>
 
-<div class="note pane">
+<div class="day pane">
+</div>
+
+<div class="pane notes">
 </div>
 
 </body>
